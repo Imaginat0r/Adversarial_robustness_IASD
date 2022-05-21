@@ -458,8 +458,6 @@ def adversarial_training_defense(model,autoencoder,device, trainloader,testloade
 
 
 
-
-
       # #### PLOTS
       plot_examples(origin_exemples, title="Original")
       plot_examples(noisy_exemples, title="Reconstructed")

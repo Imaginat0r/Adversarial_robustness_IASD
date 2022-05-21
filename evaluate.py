@@ -62,7 +62,7 @@ def test_cw(model, device, dataloader,steps,epsilon,alpha,params):
   accuracy /= size
 
   print(
-      f"Test Error: \n Accuracy: {(100*accuracy):>0.1f}%, Avg loss: {test_loss:>8f} \n"
+      f"Accuracy: {(100*accuracy):>0.1f}% \n"
   )
 
   return accuracy, test_loss
@@ -127,7 +127,7 @@ def test_pgd(model, device, dataloader,steps,epsilon,alpha,params):
   correct /= size
 
   print(
-      f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n"
+      f"Accuracy: {(100*correct):>0.1f}% \n"
   )
 
 
@@ -199,7 +199,7 @@ def pgd_attack_effect_on_accuracy(model, device, dataloader,params):
         epsilons.append(epsilon)
         accuracies.append(100*correct)
         print(
-            f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n"
+            f"Accuracy: {(100*correct):>0.1f}% \n"
         )
 
         
@@ -272,7 +272,7 @@ def deepfool_attack_effect_on_accuracy(model, device, dataloader,params):
     steps.append(step)
     accuracies.append(100*correct)
     print(
-        f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n"
+        f"Accuracy: {(100*correct):>0.1f}% \n"
     )
 
     
