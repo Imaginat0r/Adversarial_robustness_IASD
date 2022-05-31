@@ -5,7 +5,13 @@ from skimage.util import random_noise
 
 
 def plot_examples(examples, title="Exemples"):
-  """Plot a set of images"""
+  """Plot a set of images
+
+    Parameters:
+        examples : images to plot   
+        title : title of the figure
+  """
+
   plt.figure(figsize=(15,8))
   num_examples = len(examples)
   cnt = 0
@@ -21,6 +27,17 @@ def plot_examples(examples, title="Exemples"):
 
 
 def generate_noisy_data(X, device,noise_type="gaussian"):  
+    '''
+    Generates noisy images (data augmentation)
+
+    Parameters:
+        X: images to add noise on    
+        device : cpu ou cuda
+        noise_type : type of noise
+    Returns: 
+        perturbed_data : noisy images
+    '''
+
     X = X.cpu()
 
     if noise_type == "gaussian":
@@ -31,4 +48,5 @@ def generate_noisy_data(X, device,noise_type="gaussian"):
     elif noise_type == 'speckle':
         perturbed_data = random_noise(X, mode=noise_type, mean=0, var=0.05, clip=True)
 
-    return torch.tensor(perturbed_data).to(device)
+    perturbed_data = torch.tensor(perturbed_data).to(device)
+    return perturbed_data

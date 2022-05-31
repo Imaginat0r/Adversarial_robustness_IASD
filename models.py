@@ -5,25 +5,49 @@ import torch.nn.functional as F
 
 
 
-# Wide Resnet50_2
-def create_wideResnet50_2(device):
-    wide_resnet50_2 = models.wide_resnet50_2(pretrained=True)
-    return wide_resnet50_2.to(device)
 
 # Resnet50_2
 def create_Resnet50_2(device):
+    """
+    Builds resnet_50 network
+
+    Residual Networks : https://arxiv.org/pdf/1512.03385.pdf
+    """
     resnet20 = torch.hub.load("chenyaofo/pytorch-cifar-models", "cifar10_resnet20", pretrained=True)
     return resnet20.to(device)
 
 
 
+
+# Wide Resnet50_2
+def create_wideResnet50_2(device):
+    """
+    Builds wideresnet_50_2 network
+
+    Wide Residual Networks : https://arxiv.org/abs/1605.07146
+    """
+    wide_resnet50_2 = models.wide_resnet50_2(pretrained=True)
+    return wide_resnet50_2.to(device)
+
+
+
+
 def create_vgg16(device):
+    """
+    Builds VGG16 network
+    """
+
     vgg16 = torch.hub.load("chenyaofo/pytorch-cifar-models", 'cifar10_vgg16_bn', pretrained=True)
     return vgg16.to(device)
 
 
 
 class DDSA(nn.Module):
+    """Version simplifiée de l'autoencodeur DDSA
+    
+    DDSA : https://ieeexplore.ieee.org/document/8890816
+    """
+
     def __init__(self):
         super(DDSA, self).__init__()
         
@@ -44,9 +68,6 @@ class DDSA(nn.Module):
         self.linear2 = nn.Linear(2048,2048)
         self.linear3 = nn.Linear(2048,4608)
         
-        # self.linear1 = sl.SparseLinear(1152,2048)
-        # self.linear2 = sl.SparseLinear(2048,2048)
-        # self.linear3 = sl.SparseLinear(2048,2048)
         
     def forward(self, x):
         x = F.relu(self.enc1(x))

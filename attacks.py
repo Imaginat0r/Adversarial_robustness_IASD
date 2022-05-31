@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-
-import torchattacks
 from torchattacks import BIM
 
 
@@ -41,12 +39,34 @@ def PGD_linf(model, images, labels, device, epsilon=0.3, alpha=2/255, n_iter=40)
     return images
 
 
-def fgsm_attack(X, X_grad, epsilon):
-    "FGSM attack"
-    list_pertubed_imgs = []
-    for x,grad in zip(X,X_grad):
-      perturbed_image = x + epsilon * grad.sign()
-      perturbed_image = torch.clamp(perturbed_image, 0, 1)
+
+def fgsm(model, images, labels, device,epsilon=0.3) :
+    """FGSM attack
+
+    Parameters:
+        model: the network through which we pass the inputs      
+        images: the original images which we aim to perturb to make an adversarial example
+        labels: the true label of the original images
+        device : cpu or cuda
+        epsilon: perturbation budget 
+    Returns: 
+        perturbed_image : adversarial examples
+    """
+    loss = nn.CrossEntropyLoss()
+    
+    images = images.to(device)
+    labels = labels.to(device)
+    images.requires_grad = True
+            
+    outputs = model(images)
+    
+    model.zero_grad()
+    cost = loss(outputs, labels).to(device)
+    cost.backward()
+    
+    perturbed_image = images + epsilon*images.grad.sign()
+    perturbed_image = torch.clamp(perturbed_image, 0, 1)
+    
     return perturbed_image
 
 
@@ -56,15 +76,25 @@ def BIM(net,X,Y,epsilon=8/255, alpha=3/255,n_iter = 4):
   X = atk(X, Y)
   return X
 
-def deepfool(X, net, device,num_classes=10, max_iter = 10):
-    """DeepFool attack"""
-    net.eval()
+def deepfool(X, model, device,num_classes=10, max_iter = 10):
+    """DeepFool attack
+    Parameters:
+        X: the original images which we aim to perturb to make an adversarial example
+        model: the network through which we pass the inputs      
+        device : cpu or cuda
+        num_classes : number of classes
+        max_iter: maximum number of iterations
+    Returns: 
+        perturbed_images : adversarial examples
+        
+    """
+    model.eval()
     list_pertubed_imgs = []
     
     for num,x in enumerate(X):  
       x = x.unsqueeze(0)   
       with torch.no_grad(): 
-        f_classifier = net(x)
+        f_classifier = model(x)
         r = torch.zeros_like(x)
 
         # classe initiale prédite par le modèle
@@ -85,7 +115,7 @@ def deepfool(X, net, device,num_classes=10, max_iter = 10):
         x_i.requires_grad = True
 
         # Calcul de fk_x0
-        f_classifier = net(x_i)
+        f_classifier = model(x_i)
         # Calcul de grad_fk_x0
         selector = torch.zeros_like(f_classifier)
         selector[0][k_x0] = 1
@@ -98,7 +128,7 @@ def deepfool(X, net, device,num_classes=10, max_iter = 10):
 
         for i,k in enumerate(classes):
           x_i.requires_grad = True
-          f_classifier = net(x_i)
+          f_classifier = model(x_i)
 
           # Calcul de grad_fk_xi
           selector = torch.zeros_like(f_classifier)
@@ -131,7 +161,7 @@ def deepfool(X, net, device,num_classes=10, max_iter = 10):
 
             r += r_i
 
-            f_classifier = net(x_i)
+            f_classifier = model(x_i)
             k_xi = torch.argmax(f_classifier[0]).item()
 
             if k_xi != k_x0:
@@ -146,6 +176,6 @@ def deepfool(X, net, device,num_classes=10, max_iter = 10):
       x_r = x + r
       list_pertubed_imgs.append(x_r)
 
-    X = torch.cat(list_pertubed_imgs,dim=0)   
+    perturbed_images = torch.cat(list_pertubed_imgs,dim=0)   
 
-    return X
+    return perturbed_images

@@ -38,7 +38,7 @@ def test_model(dataloader,device, model, loss_fn):
     accuracy /= size
 
     print(
-        f"Test Error: \n Accuracy: {(100*accuracy):>0.1f}%, Avg loss: {loss:>8f} \n"
+        f"Test Error: \n Accuracy: {(100*accuracy):>0.1f}% \n"
     )
 
     return accuracy, loss
@@ -209,44 +209,28 @@ def adversarial_training(model,device,trainloader,testloader, params):
 
 
         # Image attaquée par PGD
-        attacks = random.choice([1,2])
+        attacks = random.sample([1,2], 2)
 
         # perturbed_data = X
 
-        # if 1 in attacks or 5 in attacks or 7 in attacks or 8 in attacks or 9 in attacks:
-        #   perturbed_data = PGD_linf(model, X, y,
-        #                           alpha=params["alpha"],
-        #                           epsilon=params["epsilon"],
-        #                           n_iter=params["n_iter"])
-        # if 2 in attacks:
-        #   # perturbed_data = attack_deepfool(X,y)
-        #   perturbed_data = transforms.RandomHorizontalFlip()(perturbed_data)
+        if 1 in attacks or 5 in attacks or 7 in attacks or 8 in attacks or 9 in attacks:
+          perturbed_data = PGD_linf(model, X, y,device,
+                                    alpha=params["alpha"],
+                                    epsilon=params["epsilon"],
+                                    n_iter=params["n_iter"])
+        if 2 in attacks:
+          # perturbed_data = attack_deepfool(X,y)
+          perturbed_data = transforms.RandomHorizontalFlip()(perturbed_data)
 
-        # if 3 in attacks :  
-        #   # Image bruitée
-        #   perturbed_data = perturbed_data + 0.03*torch.randn(*X.shape).cuda()
-        #   perturbed_data = torch.clamp(perturbed_data,0.,1.)
+        if 3 in attacks :  
+          # Image bruitée
+          perturbed_data = perturbed_data + 0.03*torch.randn(*X.shape).to(device)
+          perturbed_data = torch.clamp(perturbed_data,0.,1.)
 
-        # if 4 in attacks:
-        #   perturbed_data = transforms.RandomCrop(32,padding=2,padding_mode='reflect')(perturbed_data)
+        if 4 in attacks:
+          perturbed_data = transforms.RandomCrop(32,padding=2,padding_mode='reflect')(perturbed_data)
         
-        # # if 5 in attacks:
-        # #   perturbed_data = attack_cw(perturbed_data,y)
 
-        if attacks == 2:
-          X = transforms.RandomHorizontalFlip()(X)
-
-
-        noisy_data = X + 0.02*torch.randn(*X.shape).cuda()
-        noisy_data = torch.clamp(noisy_data,0.,1.)
-
-
-
-
-        perturbed_data = PGD_linf(model, X, y,device,
-                                  alpha=params["alpha"],
-                                  epsilon=params["epsilon"],
-                                  n_iter=params["n_iter"])
  
         perturbed_data = torch.tensor(perturbed_data,requires_grad=False)
         # perturbed_data.requires_grad = True
@@ -254,11 +238,7 @@ def adversarial_training(model,device,trainloader,testloader, params):
         # train_model(model,optimizer,loss_fn,
         #             images=X,
         #             targets=y)
-  
-        train_model(model,optimizer,loss_fn,
-                    batch_data=noisy_data,
-                    targets=y)     
-                      
+
 
         train_model(model,optimizer,loss_fn,
                     batch_data=perturbed_data,
