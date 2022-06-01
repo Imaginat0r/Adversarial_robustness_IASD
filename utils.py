@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import random
+import numpy as np
 import torch
 from skimage.util import random_noise
 
@@ -50,3 +51,22 @@ def generate_noisy_data(X, device,noise_type="gaussian"):
 
     perturbed_data = torch.tensor(perturbed_data).to(device)
     return perturbed_data
+
+def plot_augmentation(original_set, aug_set, n):
+    assert len(original_set) == len(aug_set)
+    idx = np.random.randint(0, len(original_set), n)
+    original_img = [original_set[i][0].numpy().T for i in idx]
+    aug_img = [aug_set[i][0].numpy().T for i in idx]
+
+    num_cols = len(original_img)
+    fig = plt.figure(figsize=(12, 6))
+    for i in range(num_cols):
+        ax = plt.subplot(2, num_cols, i + 1)
+        ax.imshow(original_img[i])
+        if i == 0:
+            ax.set_ylabel("Original images")
+        ax = plt.subplot(2, num_cols, i + 1 + n)
+        ax.imshow(aug_img[i])
+        if i == 0:
+            ax.set_ylabel("Augmented images")
+    plt.tight_layout()
